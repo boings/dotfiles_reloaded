@@ -1,33 +1,62 @@
--- ~/.config/nvim/lua/custom/plugins/cmp.lua
-print("Loaded my custom cmp.lua!")
 return {
   {
     "hrsh7th/nvim-cmp",
-    -- re-bring NVChad’s default sources + add the cmdline source
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",    -- LSP completions
-      "hrsh7th/cmp-buffer",      -- buffer words
-      "hrsh7th/cmp-path",        -- filesystem paths
-      "saadparwaiz1/cmp_luasnip",-- snippet integration (if you use LuaSnip)
-      "hrsh7th/cmp-cmdline",     -- ← required for : and / completions
-    },
     opts = function(_, opts)
+      local has_words_before = function()
+        unpack = unpack or table.unpack
+        local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+        return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+      end
+
       local cmp = require("cmp")
-      -- keep all NVChad defaults
-      -- then wire up cmdline sources:
+
+      opts.preselect = cmp.PreselectMode.None
+      opts.completion.completeopt = "menu,menuone,noselect"
+
+      local cmdmap = vim.tbl_extend("force", cmp.mapping.preset.cmdline(), {
+        ["<CR>"] = cmp.mapping.confirm { select = true },
+      })
+
       cmp.setup.cmdline(":", {
-        mapping = cmp.mapping.preset.cmdline(),
+        mapping = cmdmap,
         sources = cmp.config.sources(
-          { { name = "path" } },
-          { { name = "cmdline", option = { ignore_cmds = { "Man", "!" } } } }
+          {{ name = "path" }},
+          {{ name = "cmdline" }}
         ),
       })
-      cmp.setup.cmdline({ "/", "?" }, {
-        mapping = cmp.mapping.preset.cmdline(),
-        sources = { { name = "buffer" } },
+
+      cmp.setup.cmdline({ "/", "?"}, {
+        mapping = cmdmap,
+        sources = {{ name = "buffer" }},
       })
-      -- finally apply the default + your additions
-      cmp.setup(opts)
+
+      opts.mapping = vim.tbl_extend("force", opts.mapping, {
+        ["<Tab>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            -- You could replace select_next_item() with confirm({ select = true }) to get VS Code autocompletion behavior
+            cmp.select_next_item()
+          elseif vim.snippet.active({ direction = 1 }) then
+            vim.schedule(function()
+              vim.snippet.jump(1)
+            end)
+          elseif has_words_before() then
+            cmp.complete()
+          else
+            fallback()
+          end
+        end, { "i", "s" }),
+        ["<S-Tab>"] = cmp.mapping(function(fallback)
+          if cmp.visible() then
+            cmp.select_prev_item()
+          elseif vim.snippet.active({ direction = -1 }) then
+            vim.schedule(function()
+              vim.snippet.jump(-1)
+            end)
+          else
+            fallback()
+          end
+        end, { "i", "s" }),
+      })
     end,
-  },
+  }
 }
