@@ -67,13 +67,13 @@ lspconfig.rust_analyzer.setup({
   }
 })
 
-for _, lsp in ipairs(servers) do
-  lspconfig(lsp).setup {
-    on_attach = nvlsp.on_attach,
-    on_init = nvlsp.on_init,
-    capabilities = nvlsp.capabilities
-  }
-end
+-- for _, lsp in ipairs(servers) do
+--   lspconfig(lsp).setup {
+--     on_attach = nvlsp.on_attach,
+--     on_init = nvlsp.on_init,
+--     capabilities = nvlsp.capabilities
+--   }
+-- end
 
 lspconfig.omnisharp.setup {
   cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid())},
