@@ -3,11 +3,25 @@ local merge_tb = vim.tbl_deep_extend
 
 local configs = require("nvchad.configs.lspconfig")
 local on_init = configs.on_init
-local on_attach = configs.on_attach
+local on_attach = function (client, bufnr)
+  local buf_map = function (mode, lhs, rhs, desc)
+    if desc then desc = "LSP: " .. desc end
+    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+  end
+
+  buf_map("n", "gd", vim.lsp.buf.definition, "Go to Definition")
+  buf_map("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
+  buf_map("n", "gr", vim.lsp.buf.references, "References")
+  buf_map("n", "gi", vim.lsp.buf.implementation, "Implementation")
+  buf_map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
+  buf_map("n", "<leader>rn", vim.lsp.buf.rename, "Rename Symbol")
+  buf_map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
+  buf_map("n", "<leader>f", function() vim.lsp.buf.format { async = true } end, "Format Buffer")
+end
 local capabilities = configs.capabilities
 
 local lspconfig = require("lspconfig")
-local servers = { "html", "cssls", "ts_ls", "volar"}
+local servers = { "html", "cssls", "volar"}
 
 for _, lsp in ipairs(servers) do
 	local opts = {
@@ -38,26 +52,23 @@ local config = {
 }
 
 vim.diagnostic.config(config)
-local lspconfig = require'lspconfig'
-local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
-local capabilities = cmp_nvim_lsp.default_capabilities(vim.lsp.protocol.make_client_capabilities())
+lspconfig.ts_ls.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  init_options = {
+    plugins = {
+      {
+        name = "@vue/typescript-plugin",
+        location = "/usr/lib/node_modules/@vue/language-server/",
+        language = { "vue" },
+      },
+    },
+  },
+  filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact" },
+}
 
-local on_attach = function (client, bufnr)
-  local buf_map = function (mode, lhs, rhs, desc)
-    if desc then desc = "LSP: " .. desc end
-    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
-  end
-
-  buf_map("n", "gd", vim.lsp.buf.definition, "Go to Definition")
-  buf_map("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
-  buf_map("n", "gr", vim.lsp.buf.references, "References")
-  buf_map("n", "gi", vim.lsp.buf.implementation, "Implementation")
-  buf_map("n", "K", vim.lsp.buf.hover, "Hover Documentation")
-  buf_map("n", "<leader>rn", vim.lsp.buf.rename, "Rename Symbol")
-  buf_map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
-  buf_map("n", "<leader>f", function() vim.lsp.buf.format { async = true } end, "Format Buffer")
-end
+lspconfig.volar.setup {}
 
 lspconfig.pyright.setup {
   on_attach = on_attach,
