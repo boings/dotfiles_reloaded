@@ -1,7 +1,43 @@
 require("nvchad.configs.lspconfig").defaults()
+local merge_tb = vim.tbl_deep_extend
 
-local servers = { "html", "cssls" }
-local nvlsp = require "nvchad.configs.lspconfig"
+local configs = require("nvchad.configs.lspconfig")
+local on_init = configs.on_init
+local on_attach = configs.on_attach
+local capabilities = configs.capabilities
+
+local lspconfig = require("lspconfig")
+local servers = { "html", "cssls", "ts_ls", "volar"}
+
+for _, lsp in ipairs(servers) do
+	local opts = {
+		on_init = on_init,
+		on_attach = on_attach,
+		capabilities = capabilities,
+	}
+
+	local exists, settings = pcall(require, "configs.lsp.server-settings." .. lsp)
+	if exists then
+		opts = merge_tb("force", settings, opts)
+	end
+
+	lspconfig[lsp].setup(opts)
+end
+
+local config = {
+	virtual_text = false,
+	underline = true,
+	update_in_insert = false,
+	severity_sort = true,
+	float = {
+		focusable = false,
+		style = "minimal",
+		border = "single",
+		source = "always",
+	},
+}
+
+vim.diagnostic.config(config)
 local lspconfig = require'lspconfig'
 local cmp_nvim_lsp = require("cmp_nvim_lsp")
 
@@ -67,14 +103,6 @@ lspconfig.rust_analyzer.setup({
   }
 })
 
--- for _, lsp in ipairs(servers) do
---   lspconfig(lsp).setup {
---     on_attach = nvlsp.on_attach,
---     on_init = nvlsp.on_init,
---     capabilities = nvlsp.capabilities
---   }
--- end
-
 lspconfig.omnisharp.setup {
   cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid())},
   enable_roslyn_analyzers = true,
@@ -87,4 +115,3 @@ lspconfig.sqlls.setup {
   cmd = { "sql-language-server", "up", "--method", "stdio" },
 }
 
--- read :h vim.lsp.config for changing options of lsp servers 
