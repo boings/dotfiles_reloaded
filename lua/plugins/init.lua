@@ -58,6 +58,7 @@ return {
     "neovim/nvim-lspconfig",
     config = function()
       require "configs.lspconfig"
+      require "custom.plugins.cmp"
     end,
   },
   {
@@ -98,14 +99,6 @@ return {
         require("mini.bufremove").delete(0, false)
       end, { desc = "Close Buffer" })
     end,
-  },
-  {
-    "linux-cultist/venv-selector.nvim",
-    opts = {
-      name = ".venv",
-      auto_refresh = true,
-    },
-    event = "BufWritePre",
   },
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },

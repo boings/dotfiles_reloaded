@@ -53,6 +53,14 @@ local config = {
 
 vim.diagnostic.config(config)
 
+-- Path to vue ls depending on system.
+local volar_path
+if vim.fn.has("linux") then
+  volar_path = "/usr/lib/node_modules/@vue/language-server/"
+elseif vim.fn.has("macunix") then
+  volar_path = "/usr/local/lib/node_modules/@vue/language-server/"
+end
+
 lspconfig.ts_ls.setup {
   on_attach = on_attach,
   capabilities = capabilities,
@@ -60,15 +68,70 @@ lspconfig.ts_ls.setup {
     plugins = {
       {
         name = "@vue/typescript-plugin",
-        location = "/usr/lib/node_modules/@vue/language-server/",
+        location = volar_path,
         language = { "vue" },
       },
     },
   },
   filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact" },
+  settings = {
+    typescript = {
+      tsserver = {
+        useSyntaxServer = false,
+      },
+      inlayHints = {
+        includeInlayParameterNameHints = "all",
+        includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+        includeInlayFunctionParameterTypeHints = true,
+        includeInlayVariableTypeHints = true,
+        includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+        includeInlayPropertyDeclarationTypeHints = true,
+        includeInlayFunctionLikeReturnTypeHints = true,
+        includeInlayEnumMemberValueHints = true,
+      }
+    }
+  }
 }
 
-lspconfig.volar.setup {}
+lspconfig.volar.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  filetypes = { "vue", "javascript", "typescript", "javascriptreact", "typescriptreact", "json"},
+  root_dir = lspconfig.util.root_pattern(
+    "vue.config.js",
+      "vue.config.ts",
+    "nuxt.config.js",
+    "nuxt.config.ts"
+  ),
+  init_options = {
+    vue = {
+      hybridMode = false,
+    },
+  },
+  settings = {
+    typescript = {
+      inlayHints = {
+        enumMemberValues = {
+          enabled = true,
+        },
+        functionLikeReturnTypes = {
+
+          enabled = true,
+        },
+        propertyDeclarationTypes = {
+          enabled = true,
+        },
+        parameterTypes = {
+          enabled = true,
+          suppressWhenArgumentMatchesName = true,
+        },
+        variableTypes = {
+          enabled = true,
+        },
+      },
+    },
+  },
+}
 
 lspconfig.pyright.setup {
   on_attach = on_attach,
