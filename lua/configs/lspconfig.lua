@@ -148,37 +148,37 @@ lspconfig.pyright.setup {
   },
 }
 
-lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("force", {
-  on_init = on_init,
-  on_attach = on_attach,
-  capabilities = capabilities,
-}, {
-  settings = {
-    ["rust-analyzer"] = {
-      imports = {
-        granularity = {
-          group = "module",
-        },
-        prefix = "self",
-      },
-      cargo = {
-        allFeatures = true,
-      },
-      procMacro = {
-        enable = true,
-      },
-      assist = {
-        importEnforceGranularity = true, importPrefix = "by_self"
-      },
-      inlayHints = {
-        lifetimeElisionHints = {
-          enable = true
-        }
-      },
-    }
-  }
-}))
-
+-- lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("force", {
+--   on_init = on_init,
+--   on_attach = on_attach,
+--   capabilities = capabilities,
+-- }, {
+--   settings = {
+--     ["rust-analyzer"] = {
+--       imports = {
+--         granularity = {
+--           group = "module",
+--         },
+--         prefix = "self",
+--       },
+--       cargo = {
+--         allFeatures = true,
+--       },
+--       procMacro = {
+--         enable = true,
+--       },
+--       assist = {
+--         importEnforceGranularity = true, importPrefix = "by_self"
+--       },
+--       inlayHints = {
+--         lifetimeElisionHints = {
+--           enable = true
+--         }
+--       },
+--     }
+--   }
+-- }))
+--
 lspconfig.omnisharp.setup {
   cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid())},
   enable_roslyn_analyzers = true,

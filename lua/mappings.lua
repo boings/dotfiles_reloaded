@@ -1,8 +1,11 @@
 require "nvchad.mappings"
 
--- add yours here
-
 local map = vim.keymap.set
+
+map("n", "<C-_>", "<cmd>ToggleTerm<cr>", {desc = "Terminal: Toggle with Ctrl-/" })
+map("n", "<C-/>", "<cmd>ToggleTerm<cr>", {desc = "Terminal: Toggle with Ctrl-/" })
+
+map("n", "<leader>`", "<cmd>b#<cr>", {desc = "Switch to previous buffer" })
 
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
