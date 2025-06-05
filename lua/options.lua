@@ -1,6 +1,7 @@
 require "nvchad.options"
 
 vim.opt.number = true
+vim.opt.relativenumber = true
 vim.api.nvim_create_autocmd("InsertEnter", {
   pattern = "*",
   callback = function() vim.opt.relativenumber = false end,

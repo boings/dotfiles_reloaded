@@ -10,6 +10,11 @@ map("n", "<leader>`", "<cmd>b#<cr>", {desc = "Switch to previous buffer" })
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
 
+-- Trouble
+map("n", "<leader>xx", "<cmd>TroubleToggle<CR>", { desc = "Toggle Trouble" })
+map("n", "<leader>xq", "<cmd>TroubleToggle quickfix<CR>", { desc = "Quickfix List" })
+map("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<CR>", { desc = "Diagnostics" })
+
 -- In terminal buffers: Move up window
 map("t", "<C-k>", "<C-\\><C-n><C-w>k", {
   desc = "Terminal -> go to upper win"
