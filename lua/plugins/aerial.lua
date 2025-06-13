@@ -8,7 +8,7 @@ return {
         default_direction = "right",
       },
       attach_mode = "window",
-      open_automatic = true,
+      open_automatic = false,
       backends = { "lsp", "treesitter" },
     }
 

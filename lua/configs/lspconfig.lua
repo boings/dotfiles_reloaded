@@ -37,22 +37,7 @@ for _, lsp in ipairs(servers) do
 
 	lspconfig[lsp].setup(opts)
 end
-
--- local config = {
--- 	virtual_text = false,
--- 	underline = true,
--- 	update_in_insert = false,
--- 	severity_sort = true,
--- 	float = {
--- 		focusable = false,
--- 		style = "minimal",
--- 		border = "single",
--- 		source = "always",
--- 	},
--- }
 --
--- vim.diagnostic.config(config)
-
 -- Path to vue ls depending on system.
 local volar_path
 if vim.fn.has("linux") then
@@ -148,37 +133,28 @@ lspconfig.pyright.setup {
   },
 }
 
--- lspconfig.rust_analyzer.setup(vim.tbl_deep_extend("force", {
---   on_init = on_init,
---   on_attach = on_attach,
---   capabilities = capabilities,
--- }, {
---   settings = {
---     ["rust-analyzer"] = {
---       imports = {
---         granularity = {
---           group = "module",
---         },
---         prefix = "self",
---       },
---       cargo = {
---         allFeatures = true,
---       },
---       procMacro = {
---         enable = true,
---       },
---       assist = {
---         importEnforceGranularity = true, importPrefix = "by_self"
---       },
---       inlayHints = {
---         lifetimeElisionHints = {
---           enable = true
---         }
---       },
---     }
---   }
--- }))
---
+-- Only run this on Windows:
+if vim.fn.has("win32") == 1 then
+  -- Mason installs OmniSharp under stdpath("data").."/mason/packages/omnisharp/"
+  -- On Windows that folder contains OmniSharp.exe
+  local omnisharp_root = vim.fn.stdpath("data") .. "/mason/packages/omnisharp"
+  local omnisharp_bin  = omnisharp_root .. "/OmniSharp.exe"
+
+  -- You may want to double-check in your file explorer that OmniSharp.exe lives there.
+  -- If Mason has changed its path, adjust the 'omnisharp_bin' accordingly.
+
+  lspconfig.omnisharp.setup({
+    cmd = { omnisharp_bin, "--languageserver", "--hostPID", tostring(vim.fn.getpid()) },
+    on_attach   = on_attach,
+    capabilities = capabilities,
+
+    -- (Optional) Add any OmniSharp-specific settings here:
+    -- enable_roslyn_analyzers = true,
+    -- organize_imports_on_format = true,
+    -- etc.
+  })
+end
+
 lspconfig.omnisharp.setup {
   cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid())},
   enable_roslyn_analyzers = true,
