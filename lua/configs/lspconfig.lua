@@ -37,7 +37,7 @@ local capabilities = configs.capabilities
 -- 	lspconfig[lsp].setup(opts)
 -- end
 
-vim.lsp.enable { "html", "lua", "cssls", "vue_ls", "sqlls", "pyright", "ts_ls", "omnisharp", "rust-analyzer" }
+vim.lsp.enable { "html", "lua_ls", "cssls", "vue_ls", "sqlls", "pyright", "ts_ls", "omnisharp", "rust_analyzer", "move" }
 
 local vue_typescript_plugin_path = vim.fn.stdpath "data"
   .. "/mason/packages/vue-language-server/node_modules/@vue/language-server/node_modules/@vue/typescript-plugin"
@@ -61,12 +61,31 @@ vim.lsp.config("ts_ls", {
   },
 })
 
+local function hover_or_def()
+  local params = vim.lsp.util.make_position_params(0, "utf-16")
+
+  vim.lsp.buf_request(0, "textDocument/hover", params, function(_, result)
+    local contents = result and result.contents
+    -- server returns literal string "null" (not nil)
+    if not contents or contents == "null" then
+      vim.lsp.buf.definition()
+      return
+    end
+    vim.lsp.buf.hover()
+  end)
+end
+
 vim.api.nvim_create_autocmd("LspAttach", {
   callback = function(ev)
     local client = vim.lsp.get_client_by_id(ev.data.client_id)
     if client:supports_method "textDocument/completion" then
       vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
     end
+    vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = ev.buf, desc = "Go to definition" })
+    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = ev.buf, desc = "Go to declaration" })
+    vim.keymap.set("n", "gr", vim.lsp.buf.references, { buffer = ev.buf, desc = "References" })
+
+    vim.keymap.set("n", "K", hover_or_def, { buffer = ev.buf, desc = "Hover (fallback to definition)" })
   end,
 })
 
