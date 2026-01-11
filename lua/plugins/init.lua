@@ -1,7 +1,7 @@
 return {
   {
     "stevearc/conform.nvim",
-    -- event = 'BufWritePre', -- uncomment for format on save
+    event = 'BufWritePre', -- uncomment for format on save
     opts = require "configs.conform",
   },
   {
@@ -68,6 +68,7 @@ return {
   {
     "folke/trouble.nvim",
     cmd = "TroubleToggle",
+    lazy = false,
     config = function()
       require("trouble").setup()
       vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<CR>", { desc = "Toggle Trouble" })

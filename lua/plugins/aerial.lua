@@ -12,6 +12,6 @@ return {
       backends = { "lsp", "treesitter" },
     }
 
-    vim.keymap.set("n", "<leader>o", "<cmd>AerialToggle<CR>", { desc = "Toggle Outline"})
+    vim.keymap.set("n", "<leader>oo", "<cmd>AerialToggle<CR>", { desc = "Toggle Outline"})
   end,
 }
