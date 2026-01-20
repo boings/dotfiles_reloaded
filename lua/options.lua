@@ -3,6 +3,16 @@ require "nvchad.options"
 vim.opt.number = true
 vim.opt.relativenumber = true
 
+-- Platform check command (useful for debugging)
+vim.api.nvim_create_user_command("PlatformInfo", function()
+  local ok, platform = pcall(require, "utils.platform")
+  if ok then
+    platform.print_summary()
+  else
+    print("Platform module not loaded")
+  end
+end, { desc = "Show platform information" })
+
 -- Ensure relative numbers persist after all plugins load
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()

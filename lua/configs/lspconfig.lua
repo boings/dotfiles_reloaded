@@ -98,28 +98,100 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
--- Only run this on Windows:
-if vim.fn.has "win32" == 1 then
-  local omnisharp_bin = vim.fn.stdpath "data" .. "/mason/packages/omnisharp/OmniSharp.exe"
-  vim.lsp.config.omnisharp = {
-    cmd = { omnisharp_bin, "--languageserver", "--hostPID", tostring(vim.fn.getpid()) },
-    on_attach = on_attach,
-    capabilities = capabilities,
-    enable_roslyn_analyzers = true,
-    organize_imports_on_format = true,
-  }
-else
-  vim.lsp.config.omnisharp = {
-    cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid()) },
-    on_attach = on_attach,
-    capabilities = capabilities,
-    enable_roslyn_analyzers = true,
-    organize_imports_on_format = true,
-  }
+-- C#/Omnisharp configuration with platform detection
+local platform = require("utils.platform")
+
+local function get_omnisharp_cmd()
+  local mason_path = vim.fn.stdpath("data") .. "/mason/packages/omnisharp"
+
+  if platform.is_windows() then
+    -- Windows: Use .exe from Mason
+    local exe_path = mason_path .. "/OmniSharp.exe"
+    if vim.fn.filereadable(exe_path) == 1 then
+      return { exe_path, "--languageserver", "--hostPID", tostring(vim.fn.getpid()) }
+    end
+  elseif platform.is_wsl() then
+    -- WSL: Prefer Linux omnisharp, but can use Windows exe for legacy .NET projects
+    -- For modern .NET, Linux omnisharp works fine
+    local linux_path = mason_path .. "/omnisharp"
+    if vim.fn.filereadable(linux_path) == 1 then
+      return { linux_path, "--languageserver", "--hostPID", tostring(vim.fn.getpid()) }
+    end
+    -- Fallback to system omnisharp
+    if platform.executable("omnisharp") then
+      return { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid()) }
+    end
+  else
+    -- Linux/macOS: Use system omnisharp or Mason-installed
+    local linux_path = mason_path .. "/omnisharp"
+    if vim.fn.filereadable(linux_path) == 1 then
+      return { linux_path, "--languageserver", "--hostPID", tostring(vim.fn.getpid()) }
+    end
+    if platform.executable("omnisharp") then
+      return { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid()) }
+    end
+  end
+
+  -- Final fallback
+  return { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid()) }
 end
 
-vim.lsp.config.omnisharp = {
-  cmd = { "omnisharp", "--languageserver", "--hostPID", tostring(vim.fn.getpid()) },
-  enable_roslyn_analyzers = true,
-  organize_imports_on_format = true,
-}
+vim.lsp.config("omnisharp", {
+  cmd = get_omnisharp_cmd(),
+  on_attach = function(client, bufnr)
+    -- Call the standard on_attach
+    on_attach(client, bufnr)
+
+    -- Use omnisharp-extended for better go-to-definition (supports decompilation)
+    local ok, omnisharp_extended = pcall(require, "omnisharp_extended")
+    if ok then
+      vim.keymap.set("n", "gd", function()
+        omnisharp_extended.lsp_definition()
+      end, { buffer = bufnr, desc = "Go to Definition (omnisharp-extended)" })
+
+      vim.keymap.set("n", "gr", function()
+        omnisharp_extended.lsp_references()
+      end, { buffer = bufnr, desc = "References (omnisharp-extended)" })
+
+      vim.keymap.set("n", "gi", function()
+        omnisharp_extended.lsp_implementation()
+      end, { buffer = bufnr, desc = "Implementation (omnisharp-extended)" })
+    end
+  end,
+  capabilities = capabilities,
+  -- Omnisharp settings
+  settings = {
+    FormattingOptions = {
+      EnableEditorConfigSupport = true,
+      OrganizeImports = true,
+    },
+    MsBuild = {
+      LoadProjectsOnDemand = false,
+    },
+    RoslynExtensionsOptions = {
+      EnableAnalyzersSupport = true,
+      EnableImportCompletion = true,
+      AnalyzeOpenDocumentsOnly = false,
+    },
+    Sdk = {
+      IncludePrereleases = true,
+    },
+  },
+  -- Handle both legacy and modern .NET
+  handlers = {
+    ["textDocument/definition"] = function(...)
+      local ok, omnisharp_extended = pcall(require, "omnisharp_extended")
+      if ok then
+        return omnisharp_extended.handler(...)
+      end
+      return vim.lsp.handlers["textDocument/definition"](...)
+    end,
+  },
+  -- Root detection for both legacy and modern projects
+  root_markers = {
+    "*.sln",
+    "*.csproj",
+    "omnisharp.json",
+    ".git",
+  },
+})
