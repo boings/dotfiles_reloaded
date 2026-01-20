@@ -81,9 +81,6 @@ return {
     event = "BufRead"
   },
   {
-    "nvim-treesitter/nvim-treesitter-context"
-  },
-  {
     "tpope/vim-rhubarb",
     event = "BufRead"
   },

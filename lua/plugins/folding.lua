@@ -2,15 +2,21 @@ return {
   "kevinhwang91/nvim-ufo",
   dependencies = {
     "kevinhwang91/promise-async",
+    "nvim-treesitter/nvim-treesitter",
   },
   event = "BufReadPost",
-  config = function()
+  init = function()
+    -- Set these early, before buffers load
     vim.o.foldcolumn = "1"
     vim.o.foldlevel = 99
+    vim.o.foldlevelstart = 99
     vim.o.foldenable = true
-    vim.o.foldmethod = "expr"
-    vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-
-    require("ufo").setup()
+  end,
+  config = function()
+    require("ufo").setup {
+      provider_selector = function(bufnr, filetype, buftype)
+        return { "treesitter", "indent" }
+      end,
+    }
   end,
 }

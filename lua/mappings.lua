@@ -2,8 +2,11 @@ require "nvchad.mappings"
 
 local map = vim.keymap.set
 
-map("n", "<C-_>", "gcc", { desc = "Toggle Comment" })
-map("v", "<C-_>", "gc", { desc = "Toggle Comment" })
+-- Ctrl+/ to toggle comment (both terminal representations)
+map("n", "<C-/>", "gcc", { desc = "Toggle Comment", remap = true })
+map("v", "<C-/>", "gc", { desc = "Toggle Comment", remap = true })
+map("n", "<C-_>", "gcc", { desc = "Toggle Comment", remap = true })
+map("v", "<C-_>", "gc", { desc = "Toggle Comment", remap = true })
 
 map("n", "<leader>`", "<cmd>b#<cr>", { desc = "Switch to previous buffer" })
 
