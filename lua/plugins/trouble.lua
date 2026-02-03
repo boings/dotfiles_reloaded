@@ -1,11 +1,24 @@
 return {
   "folke/trouble.nvim",
-  cmd = "TroubleToggle",
+  cmd = "Trouble",
   lazy = false,
-  config = function()
-    require("trouble").setup()
-    vim.keymap.set("n", "<leader>xx", "<cmd>TroubleToggle<CR>", { desc = "Toggle Trouble" })
-    vim.keymap.set("n", "<leader>xq", "<cmd>TroubleToggle quickfix<CR>", { desc = "Quickfix List" })
-    vim.keymap.set("n", "<leader>xd", "<cmd>TroubleToggle document_diagnostics<CR>", { desc = "Diagnostics" })
-  end,
+  opts = {
+    focus = true,
+    auto_preview = false, -- less noisy
+    win = {
+      size = { width = 60, height = 10 }, -- compact
+    },
+    modes = {
+      diagnostics = {
+        auto_close = true, -- close when no diagnostics
+        win = { position = "bottom" },
+      },
+    },
+  },
+  keys = {
+    { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (project)" },
+    { "<leader>xd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Diagnostics (buffer)" },
+    { "<leader>xq", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix" },
+    { "<leader>xl", "<cmd>Trouble loclist toggle<cr>", desc = "Location list" },
+  },
 }

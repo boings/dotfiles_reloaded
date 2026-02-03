@@ -76,10 +76,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
       return
     end
 
-    if client:supports_method "textDocument/completion" then
-      vim.lsp.completion.enable(true, client.id, ev.buf, { autotrigger = true })
-    end
-
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = ev.buf, desc = "Go to definition" })
     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = ev.buf, desc = "Go to declaration" })
     vim.keymap.set("n", "gr", vim.lsp.buf.references, { buffer = ev.buf, desc = "References" })
@@ -157,6 +153,11 @@ vim.lsp.config("omnisharp", {
         omnisharp_extended.lsp_implementation()
       end, { buffer = bufnr, desc = "Implementation (omnisharp-extended)" })
     end
+
+    -- Refresh CodeLens for C#
+    if client.supports_method "textDocument/codeLens" then
+      vim.lsp.codelens.refresh { bufnr = bufnr }
+    end
   end,
   capabilities = capabilities,
   -- Omnisharp settings
@@ -172,6 +173,11 @@ vim.lsp.config("omnisharp", {
       EnableAnalyzersSupport = true,
       EnableImportCompletion = true,
       AnalyzeOpenDocumentsOnly = false,
+      EnableDecompilationSupport = true,
+    },
+    csharp = {
+      referencesCodeLens = { enabled = true },
+      implementationsCodeLens = { enabled = true },
     },
     Sdk = {
       IncludePrereleases = true,

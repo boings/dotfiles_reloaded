@@ -22,15 +22,6 @@ return {
       },
     })
 
-    -- Auto-open minimap on buffer enter
-    vim.api.nvim_create_autocmd("BufEnter", {
-      callback = function()
-        if vim.bo.buftype == "" then
-          map.open()
-        end
-      end,
-    })
-
     vim.keymap.set("n", "<leader>mm", map.toggle, { desc = "Toggle Minimap" })
   end,
 }
